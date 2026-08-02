@@ -63,6 +63,8 @@ import {
   resolveModelWithTier,
   resolveModelWithVariant,
   resolveModelForHeaderStyle,
+  resolveGemini35FlashModelForLevel,
+  resolveGemini36FlashModelForLevel,
   isClaudeModel,
   isClaudeThinkingModel,
   CLAUDE_THINKING_MAX_OUTPUT_TOKENS,
@@ -939,6 +941,9 @@ export function prepareAntigravityRequest(
             tierThinkingLevel = undefined;
           }
         }
+
+        effectiveModel = resolveGemini35FlashModelForLevel(effectiveModel, tierThinkingLevel);
+        effectiveModel = resolveGemini36FlashModelForLevel(effectiveModel, tierThinkingLevel);
 
         if (isClaude) {
           if (!requestPayload.toolConfig) {

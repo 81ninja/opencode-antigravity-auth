@@ -22,6 +22,8 @@ export {
   resolveModelWithTier,
   resolveModelWithVariant,
   resolveModelForHeaderStyle,
+  resolveGemini35FlashModelForLevel,
+  resolveGemini36FlashModelForLevel,
   getModelFamily,
   MODEL_ALIASES,
   THINKING_TIER_BUDGETS,

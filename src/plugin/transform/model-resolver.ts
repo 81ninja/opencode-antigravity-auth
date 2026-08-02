@@ -48,6 +48,16 @@ export const MODEL_ALIASES: Record<string, string> = {
   "gemini-3-flash-medium": "gemini-3-flash",
   "gemini-3-flash-high": "gemini-3-flash",
 
+  "gemini-3.5-flash": "gemini-3.5-flash-low",
+  "gemini-3.5-flash-minimal": "gemini-3.5-flash-low",
+  "gemini-3.5-flash-medium": "gemini-3.5-flash-low",
+  "gemini-3.5-flash-high": "gemini-3-flash-agent",
+
+  "gemini-3.6-flash": "gemini-3.6-flash-low",
+  "gemini-3.6-flash-minimal": "gemini-3.6-flash-low",
+  "gemini-3.6-flash-medium": "gemini-3.6-flash-medium",
+  "gemini-3.6-flash-high": "gemini-3.6-flash-high",
+
   // Claude proxy names (gemini- prefix for compatibility)
   "gemini-claude-opus-4-6-thinking-low": "claude-opus-4-6-thinking",
   "gemini-claude-opus-4-6-thinking-medium": "claude-opus-4-6-thinking",
@@ -63,6 +73,8 @@ const TIER_REGEX = /-(minimal|low|medium|high)$/;
 const QUOTA_PREFIX_REGEX = /^antigravity-/i;
 const GEMINI_3_PRO_REGEX = /^gemini-3(?:\.\d+)?-pro/i;
 const GEMINI_3_FLASH_REGEX = /^gemini-3(?:\.\d+)?-flash/i;
+const GEMINI_3_5_FLASH_REGEX = /^gemini-3\.5-flash/i;
+const GEMINI_3_6_FLASH_REGEX = /^gemini-3\.6-flash/i;
 
 // ANTIGRAVITY_ONLY_MODELS removed - all models now default to antigravity
 
@@ -187,6 +199,10 @@ export function resolveModelWithTier(requestedModel: string, options: ModelResol
   if (skipAlias) {
     if (isGemini3Pro && !tier && !isImageModel) {
       antigravityModel = `${modelWithoutQuota}-low`;
+    } else if (isGemini3Flash && GEMINI_3_5_FLASH_REGEX.test(modelWithoutQuota)) {
+      antigravityModel = tier === "high" ? "gemini-3-flash-agent" : `${baseName}-low`;
+    } else if (isGemini3Flash && GEMINI_3_6_FLASH_REGEX.test(modelWithoutQuota)) {
+      antigravityModel = resolveGemini36FlashModelForLevel(baseName, tier);
     } else if (isGemini3Flash && tier) {
       antigravityModel = baseName;
     }
@@ -298,6 +314,32 @@ function budgetToGemini3Level(budget: number): "low" | "medium" | "high" {
   return "high";
 }
 
+export function resolveGemini35FlashModelForLevel(
+  actualModel: string,
+  level: string | undefined,
+): string {
+  const isGemini35Flash = GEMINI_3_5_FLASH_REGEX.test(actualModel);
+  const isGemini35Agent = actualModel === "gemini-3-flash-agent";
+  if (!isGemini35Flash && !isGemini35Agent) {
+    return actualModel;
+  }
+  if (level === "high") return "gemini-3-flash-agent";
+  return "gemini-3.5-flash-low";
+}
+
+export function resolveGemini36FlashModelForLevel(
+  actualModel: string,
+  level: string | undefined,
+): string {
+  const isGemini36Flash = GEMINI_3_6_FLASH_REGEX.test(actualModel);
+  if (!isGemini36Flash) {
+    return actualModel;
+  }
+  if (level === "high") return "gemini-3.6-flash-high";
+  if (level === "medium") return "gemini-3.6-flash-medium";
+  return "gemini-3.6-flash-low";
+}
+
 /**
  * Resolves model name for a specific headerStyle (quota fallback support).
  * Transforms model names when switching between gemini-cli and antigravity quotas.
@@ -392,6 +434,9 @@ export function resolveModelWithVariant(
     if (isAntigravityGemini3Pro) {
       const baseModel = base.actualModel.replace(/-(low|medium|high)$/, "");
       actualModel = `${baseModel}-${level}`;
+    } else {
+      actualModel = resolveGemini35FlashModelForLevel(actualModel, level);
+      actualModel = resolveGemini36FlashModelForLevel(actualModel, level);
     }
 
     return {
