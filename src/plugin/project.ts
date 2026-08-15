@@ -1,5 +1,6 @@
 import {
   getAntigravityHeaders,
+  getAntigravityCliHeaders,
   ANTIGRAVITY_ENDPOINT_FALLBACKS,
   ANTIGRAVITY_LOAD_ENDPOINTS,
   ANTIGRAVITY_DEFAULT_PROJECT_ID,
@@ -122,15 +123,14 @@ export async function loadManagedProject(
   accessToken: string,
   projectId?: string,
 ): Promise<LoadCodeAssistPayload | null> {
-  const metadata = buildMetadata(projectId);
-  const requestBody: Record<string, unknown> = { metadata };
+  const requestBody: Record<string, unknown> = {
+    metadata: { ideType: "ANTIGRAVITY" },
+  };
 
   const loadHeaders: Record<string, string> = {
     "Content-Type": "application/json",
     Authorization: `Bearer ${accessToken}`,
-    "User-Agent": "google-api-nodejs-client/9.15.1",
-    "X-Goog-Api-Client": "google-cloud-sdk vscode_cloudshelleditor/0.1",
-    "Client-Metadata": getAntigravityHeaders()["Client-Metadata"],
+    ...getAntigravityCliHeaders(),
   };
 
   const loadEndpoints = Array.from(

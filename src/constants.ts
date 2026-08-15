@@ -110,6 +110,14 @@ export const GEMINI_CLI_HEADERS = {
   "Client-Metadata": "ideType=IDE_UNSPECIFIED,platform=PLATFORM_UNSPECIFIED,pluginType=GEMINI",
 } as const;
 
+export function getAntigravityCliHeaders(): { "User-Agent": string } {
+  const platform = process.platform === "darwin" ? "darwin" : process.platform === "win32" ? "windows" : "linux";
+  const arch = process.arch === "arm64" ? "arm64" : "amd64";
+  return {
+    "User-Agent": `antigravity/cli/${getAntigravityVersion()} (aidev_client; os_type=${platform}; arch=${arch}; cl=0; auth_method=consumer)`,
+  };
+}
+
 const ANTIGRAVITY_PLATFORMS = ["windows/amd64", "darwin/arm64", "darwin/amd64"] as const;
 
 const ANTIGRAVITY_API_CLIENTS = [

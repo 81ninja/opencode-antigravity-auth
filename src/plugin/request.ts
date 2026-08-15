@@ -7,6 +7,7 @@ import {
   EMPTY_SCHEMA_PLACEHOLDER_DESCRIPTION,
   SKIP_THOUGHT_SIGNATURE,
   getRandomizedHeaders,
+  getAntigravityCliHeaders,
   type HeaderStyle,
 } from "../constants";
 import { cacheSignature, getCachedSignature } from "./cache";
@@ -65,6 +66,8 @@ import {
   resolveModelForHeaderStyle,
   resolveGemini35FlashModelForLevel,
   resolveGemini36FlashModelForLevel,
+  resolveGemini37FlashModelForLevel,
+  isGemini37FlashModel,
   isClaudeModel,
   isClaudeThinkingModel,
   CLAUDE_THINKING_MAX_OUTPUT_TOKENS,
@@ -944,6 +947,7 @@ export function prepareAntigravityRequest(
 
         effectiveModel = resolveGemini35FlashModelForLevel(effectiveModel, tierThinkingLevel);
         effectiveModel = resolveGemini36FlashModelForLevel(effectiveModel, tierThinkingLevel);
+        effectiveModel = resolveGemini37FlashModelForLevel(effectiveModel, tierThinkingLevel);
 
         if (isClaude) {
           if (!requestPayload.toolConfig) {
@@ -1541,7 +1545,9 @@ export function prepareAntigravityRequest(
     }
   }
 
-  if (headerStyle === "antigravity") {
+  if (isGemini37FlashModel(effectiveModel)) {
+    headers.set("User-Agent", getAntigravityCliHeaders()["User-Agent"]);
+  } else if (headerStyle === "antigravity") {
     // Use randomized headers as the fallback pool for Antigravity mode
     const selectedHeaders = getRandomizedHeaders("antigravity", requestedModel);
 

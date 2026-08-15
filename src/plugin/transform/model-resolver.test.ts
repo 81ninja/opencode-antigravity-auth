@@ -226,6 +226,33 @@ describe("resolveModelWithTier", () => {
       expect(result.explicitQuota).toBe(true);
     });
   });
+
+  describe("Gemini 3.7 Flash routing", () => {
+    it("maps bare gemini-3.7-flash to gemini-3.7-flash-low", () => {
+      const result = resolveModelWithTier("gemini-3.7-flash");
+      expect(result.actualModel).toBe("gemini-3.7-flash-low");
+      expect(result.thinkingLevel).toBe("low");
+    });
+
+    it("maps gemini-3.7-flash-medium to gemini-3.7-flash-medium", () => {
+      const result = resolveModelWithTier("gemini-3.7-flash-medium");
+      expect(result.actualModel).toBe("gemini-3.7-flash-medium");
+      expect(result.thinkingLevel).toBe("medium");
+    });
+
+    it("maps gemini-3.7-flash-high to gemini-3.7-flash-high", () => {
+      const result = resolveModelWithTier("gemini-3.7-flash-high");
+      expect(result.actualModel).toBe("gemini-3.7-flash-high");
+      expect(result.thinkingLevel).toBe("high");
+    });
+
+    it("resolves explicit antigravity-gemini-3.7-flash via skipAlias path", () => {
+      const result = resolveModelWithTier("antigravity-gemini-3.7-flash");
+      expect(result.actualModel).toBe("gemini-3.7-flash-low");
+      expect(result.thinkingLevel).toBe("low");
+      expect(result.explicitQuota).toBe(true);
+    });
+  });
 });
 
 describe("resolveModelWithVariant", () => {
@@ -326,6 +353,26 @@ describe("resolveModelWithVariant", () => {
         thinkingBudget: 32000,
       });
       expect(high.actualModel).toBe("gemini-3.6-flash-high");
+      expect(high.thinkingLevel).toBe("high");
+    });
+
+    it("routes Gemini 3.7 Flash budgets to per-tier backend ids", () => {
+      const low = resolveModelWithVariant("antigravity-gemini-3.7-flash", {
+        thinkingBudget: 6000,
+      });
+      expect(low.actualModel).toBe("gemini-3.7-flash-low");
+      expect(low.thinkingLevel).toBe("low");
+
+      const medium = resolveModelWithVariant("antigravity-gemini-3.7-flash", {
+        thinkingBudget: 12000,
+      });
+      expect(medium.actualModel).toBe("gemini-3.7-flash-medium");
+      expect(medium.thinkingLevel).toBe("medium");
+
+      const high = resolveModelWithVariant("antigravity-gemini-3.7-flash", {
+        thinkingBudget: 32000,
+      });
+      expect(high.actualModel).toBe("gemini-3.7-flash-high");
       expect(high.thinkingLevel).toBe("high");
     });
   });

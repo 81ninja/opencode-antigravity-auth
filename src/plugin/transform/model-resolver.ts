@@ -58,6 +58,11 @@ export const MODEL_ALIASES: Record<string, string> = {
   "gemini-3.6-flash-medium": "gemini-3.6-flash-medium",
   "gemini-3.6-flash-high": "gemini-3.6-flash-high",
 
+  "gemini-3.7-flash": "gemini-3.7-flash-low",
+  "gemini-3.7-flash-minimal": "gemini-3.7-flash-low",
+  "gemini-3.7-flash-medium": "gemini-3.7-flash-medium",
+  "gemini-3.7-flash-high": "gemini-3.7-flash-high",
+
   // Claude proxy names (gemini- prefix for compatibility)
   "gemini-claude-opus-4-6-thinking-low": "claude-opus-4-6-thinking",
   "gemini-claude-opus-4-6-thinking-medium": "claude-opus-4-6-thinking",
@@ -75,6 +80,7 @@ const GEMINI_3_PRO_REGEX = /^gemini-3(?:\.\d+)?-pro/i;
 const GEMINI_3_FLASH_REGEX = /^gemini-3(?:\.\d+)?-flash/i;
 const GEMINI_3_5_FLASH_REGEX = /^gemini-3\.5-flash/i;
 const GEMINI_3_6_FLASH_REGEX = /^gemini-3\.6-flash/i;
+const GEMINI_3_7_FLASH_REGEX = /^gemini-3\.7-flash/i;
 
 // ANTIGRAVITY_ONLY_MODELS removed - all models now default to antigravity
 
@@ -203,6 +209,8 @@ export function resolveModelWithTier(requestedModel: string, options: ModelResol
       antigravityModel = tier === "high" ? "gemini-3-flash-agent" : `${baseName}-low`;
     } else if (isGemini3Flash && GEMINI_3_6_FLASH_REGEX.test(modelWithoutQuota)) {
       antigravityModel = resolveGemini36FlashModelForLevel(baseName, tier);
+    } else if (isGemini3Flash && GEMINI_3_7_FLASH_REGEX.test(modelWithoutQuota)) {
+      antigravityModel = resolveGemini37FlashModelForLevel(baseName, tier);
     } else if (isGemini3Flash && tier) {
       antigravityModel = baseName;
     }
@@ -340,6 +348,23 @@ export function resolveGemini36FlashModelForLevel(
   return "gemini-3.6-flash-low";
 }
 
+export function resolveGemini37FlashModelForLevel(
+  actualModel: string,
+  level: string | undefined,
+): string {
+  const isGemini37Flash = GEMINI_3_7_FLASH_REGEX.test(actualModel);
+  if (!isGemini37Flash) {
+    return actualModel;
+  }
+  if (level === "high") return "gemini-3.7-flash-high";
+  if (level === "medium") return "gemini-3.7-flash-medium";
+  return "gemini-3.7-flash-low";
+}
+
+export function isGemini37FlashModel(model: string): boolean {
+  return GEMINI_3_7_FLASH_REGEX.test(model);
+}
+
 /**
  * Resolves model name for a specific headerStyle (quota fallback support).
  * Transforms model names when switching between gemini-cli and antigravity quotas.
@@ -437,6 +462,7 @@ export function resolveModelWithVariant(
     } else {
       actualModel = resolveGemini35FlashModelForLevel(actualModel, level);
       actualModel = resolveGemini36FlashModelForLevel(actualModel, level);
+      actualModel = resolveGemini37FlashModelForLevel(actualModel, level);
     }
 
     return {
