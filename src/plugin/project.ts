@@ -240,7 +240,7 @@ export async function ensureProjectContext(auth: OAuthAuthDetails): Promise<Proj
     }
   }
 
-  const resolveContext = async (): Promise<ProjectContextResult> => {
+    const resolveContext = async (): Promise<ProjectContextResult> => {
     const parts = parseRefreshParts(auth.refresh);
     if (parts.managedProjectId) {
       return { auth, effectiveProjectId: parts.managedProjectId };

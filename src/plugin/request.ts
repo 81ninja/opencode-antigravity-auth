@@ -67,7 +67,9 @@ import {
   resolveGemini35FlashModelForLevel,
   resolveGemini36FlashModelForLevel,
   resolveGemini37FlashModelForLevel,
+  resolveGemini38FlashModelForLevel,
   isGemini37FlashModel,
+  isGemini38FlashModel,
   isClaudeModel,
   isClaudeThinkingModel,
   CLAUDE_THINKING_MAX_OUTPUT_TOKENS,
@@ -1545,7 +1547,7 @@ export function prepareAntigravityRequest(
     }
   }
 
-  if (isGemini37FlashModel(effectiveModel)) {
+  if (isGemini37FlashModel(effectiveModel) || isGemini38FlashModel(effectiveModel)) {
     headers.set("User-Agent", getAntigravityCliHeaders()["User-Agent"]);
   } else if (headerStyle === "antigravity") {
     // Use randomized headers as the fallback pool for Antigravity mode

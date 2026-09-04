@@ -666,6 +666,21 @@ it("removes x-api-key header", () => {
       expect(headers.get("User-Agent")).toMatch(/^antigravity\/cli\/\d+\.\d+\.\d+ \(aidev_client/);
     });
 
+    it("uses aidev_client CLI User-Agent for Gemini 3.8 Flash with antigravity headerStyle", () => {
+      const result = prepareAntigravityRequest(
+        "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent",
+        { method: "POST", body: JSON.stringify({ contents: [] }) },
+        mockAccessToken,
+        mockProjectId,
+        undefined,
+        "antigravity"
+      );
+      const headers = result.init.headers as Headers;
+      const ua = headers.get("User-Agent");
+      expect(ua).toMatch(/^antigravity\/cli\/\d+\.\d+\.\d+ \(aidev_client; os_type=[a-z]+; arch=[a-z0-9]+; cl=0; auth_method=consumer\)$/);
+      expect(result.effectiveModel).toContain("gemini-3.8-flash");
+    });
+
     it("does not use aidev_client User-Agent for non-3.7 models", () => {
       const result = prepareAntigravityRequest(
         "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent",
